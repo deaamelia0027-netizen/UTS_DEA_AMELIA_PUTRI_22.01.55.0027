@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Perpustakaan </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --info-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/library/1920/1080.jpg') center/cover no-repeat;
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        .navbar {
+            background: var(--primary-gradient) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .nav-link {
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            font-weight: 700;
+            color: #333;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        h4 {
+            font-weight: 600;
+            position: relative;
+            padding-left: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        h4::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 25px;
+            background: var(--primary-gradient);
+            border-radius: 3px;
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            position: relative;
+            background: white;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-body {
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .card i {
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .card:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .card-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .section-title.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .card-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Delay animation for cards */
+        .card-animate:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .card-animate:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .card-animate:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+
+        .card-animate:nth-child(4) {
+            transition-delay: 0.4s;
+        }
+
+        /* Icon colors */
+        .icon-primary {
+            color: #667eea;
+        }
+
+        .icon-success {
+            color: #4facfe;
+        }
+
+        .icon-warning {
+            color: #fa709a;
+        }
+
+        .icon-info {
+            color: #43e97b;
+        }
+
+        .icon-danger {
+            color: #f5576c;
+        }
+
+        .icon-dark {
+            color: #330867;
+        }
+
+        .icon-secondary {
+            color: #6c757d;
+        }
+
+        .icon-purple {
+            color: #6f42c1;
+        }
+
+        .icon-orange {
+            color: #fd7e14;
+        }
+
+        footer {
+            margin-top: 5rem;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #ccc, transparent);
+        }
+
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 120px;
+            height: 120px;
+            background: var(--success-gradient);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 70%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            background: var(--warning-gradient);
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            bottom: 10%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 200px;
+            margin: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .card-body {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand animate__animated animate__fadeInLeft" href="index.html">
+                <i class="bi bi-book-half"></i>
+                Perpustakaan 
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active animate__animated animate__fadeInRight"
+                            href="index.html">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="animate__animated animate__fadeInDown">Dashboard Administrasi</h2>
+
+        <div class="stats-container">
+            <div class="stat-card animate__animated animate__fadeInUp">
+                <div class="stat-number">1,234</div>
+                <div class="stat-label">Total Buku</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="stat-number">567</div>
+                <div class="stat-label">Total Anggota</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="stat-number">89</div>
+                <div class="stat-label">Peminjaman Aktif</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Pengembalian Hari Ini</div>
+            </div>
+        </div>
+
+        <h4 class="section-title mb-3 mt-4" style="color: #555;">Data Master</h4>
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-3">
+                <a href="buku-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-journal-richtext fs-1 icon-primary"></i>
+                            <h5 class="card-title mt-2">Kelola Buku</h5>
+                            <p class="card-text">Atur data master buku.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <a href="penulis-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-person-fill fs-1 icon-success"></i>
+                            <h5 class="card-title mt-2">Kelola Penulis</h5>
+                            <p class="card-text">Atur data penulis buku.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <a href="penerbit-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-building fs-1 icon-warning"></i>
+                            <h5 class="card-title mt-2">Kelola Penerbit</h5>
+                            <p class="card-text">Atur data master penerbit.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <a href="kategori-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-tags-fill fs-1 icon-info"></i>
+                            <h5 class="card-title mt-2">Kelola Kategori</h5>
+                            <p class="card-text">Atur data kategori buku.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <h4 class="section-title mb-3 mt-5" style="color: #555;">Data Pengguna</h4>
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-3">
+                <a href="users-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-people-fill fs-1 icon-dark"></i>
+                            <h5 class="card-title mt-2">Kelola Anggota</h5>
+                            <p class="card-text">Atur data anggota & admin.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <a href="roles-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-shield-lock-fill fs-1 icon-secondary"></i>
+                            <h5 class="card-title mt-2">Kelola Roles</h5>
+                            <p class="card-text">Atur hak akses pengguna.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <h4 class="section-title mb-3 mt-5" style="color: #555;">Data Transaksi & Relasi</h4>
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-3">
+                <a href="peminjaman-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-box-arrow-up-right fs-1 icon-danger"></i>
+                            <h5 class="card-title mt-2">Kelola Peminjaman</h5>
+                            <p class="card-text">Catat transaksi peminjaman.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <a href="buku-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-link-45deg fs-1 icon-purple"></i>
+                            <h5 class="card-title mt-2">Relasi Buku-Penulis</h5>
+                            <p class="card-text">Atur via "Kelola Buku".</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <a href="buku-list.html" class="card-link">
+                    <div class="card text-center h-100 card-animate">
+                        <div class="card-body">
+                            <i class="bi bi-link-45deg fs-1 icon-orange"></i>
+                            <h5 class="card-title mt-2">Relasi Buku-Kategori</h5>
+                            <p class="card-text">Atur via "Kelola Buku".</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="container text-center mt-5 mb-4">
+        <hr>
+        <p class="text-muted animate__animated animate__fadeIn">&copy; 2025 - Proyek UTS [NIM-NAMA ANDA]</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate elements on scroll
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all elements with animation classes
+            document.querySelectorAll('.section-title, .card-animate').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Navbar background on scroll
+            window.addEventListener('scroll', function () {
+                const navbar = document.querySelector('.navbar');
+                if (window.scrollY > 50) {
+                    navbar.style.padding = '0.5rem 0';
+                    navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+                } else {
+                    navbar.style.padding = '1rem 0';
+                    navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+                }
+            });
+
+            // Add ripple effect to cards
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', function (e) {
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+
+                    const x = e.clientX - e.target.offsetLeft;
+                    const y = e.clientY - e.target.offsetTop;
+
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    </script>
+
+    <style>
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+
+</html>

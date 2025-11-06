@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Users - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --info-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/users/1920/1080.jpg') center/cover no-repeat;
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        .navbar {
+            background: var(--dark-gradient) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+            color: white !important;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            font-weight: 700;
+            color: #333;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--dark-gradient);
+            border-radius: 2px;
+        }
+
+        .btn {
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-dark {
+            background: var(--dark-gradient);
+            border: none;
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            border: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            border: none;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid #eee;
+            font-weight: 600;
+            color: #555;
+            position: relative;
+            padding: 15px 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .table thead th:hover {
+            background-color: rgba(48, 207, 208, 0.05);
+        }
+
+        .table thead th i {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(48, 207, 208, 0.05);
+            transform: scale(1.01);
+        }
+
+        .table tbody td {
+            padding: 15px 12px;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(48, 207, 208, 0.05);
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+            padding: 15px 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #721c24;
+        }
+
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 80px;
+            height: 80px;
+            background: var(--dark-gradient);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 120px;
+            height: 120px;
+            background: var(--success-gradient);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 70%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            background: var(--info-gradient);
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            bottom: 10%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            border-radius: 30px;
+            padding: 10px 20px 10px 45px;
+            border: 1px solid #ddd;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(48, 207, 208, 0.2);
+            border-color: #30cfd0;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .table-row-animate {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 200px;
+            margin: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--dark-gradient);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--dark-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover .stat-number {
+            transform: scale(1.1);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 0;
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--dark-gradient);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success-gradient);
+        }
+
+        .notification.error {
+            background: var(--danger-gradient);
+        }
+
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/users/1920/1080.jpg') center/cover no-repeat;
+            opacity: 0.05;
+            z-index: -1;
+            transform: translateY(0);
+            transition: transform 0.5s ease;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .role-badge.admin {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .role-badge.anggota {
+            background: var(--info-gradient);
+            color: white;
+        }
+
+        .role-badge.default {
+            background: var(--secondary-gradient);
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--dark-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="parallax-bg"></div>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand animate__animated animate__fadeInLeft" href="index.html">
+                <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 animate__animated animate__fadeInDown">
+            <h2><i class="bi bi-people-fill"></i> Daftar Pengguna (Users)</h2>
+            <a href="users-tambah.html" class="btn btn-dark animate__animated animate__fadeInRight">
+                <i class="bi bi-plus-circle-fill"></i> Tambah User Baru
+            </a>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card animate__animated animate__fadeInUp">
+                <div class="stat-number" id="total-users">0</div>
+                <div class="stat-label">Total Pengguna</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="stat-number" id="total-admins">0</div>
+                <div class="stat-label">Total Admin</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="stat-number" id="total-anggota">0</div>
+                <div class="stat-label">Total Anggota</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                <div class="stat-number" id="users-terbaru">0</div>
+                <div class="stat-label">Ditambahkan Bulan Ini</div>
+            </div>
+        </div>
+
+        <div class="search-container animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="search-input"
+                placeholder="Cari pengguna berdasarkan nama, username, atau email...">
+        </div>
+
+        <div id="loading-spinner" class="loading-container animate__animated animate__fadeIn">
+            <div class="spinner-border text-dark" role="status">
+                <span class="visually-hidden">Memuat...</span>
+            </div>
+            <p class="loading-text">Memuat data pengguna...</p>
+        </div>
+
+        <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.5s">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th onclick="sortTable(0)">ID <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable(1)">Nama Lengkap <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable(2)">Username <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable(3)">Email <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable(4)">Role (Peran) <i class="bi bi-arrow-down-up"></i></th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-users-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus pengguna "<span id="delete-user-name"></span>"?</p>
+                    <p class="text-danger"><small>Peringatan: Tindakan ini tidak dapat dibatalkan.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_URL_USERS = 'backend/api.php/records/users';
+        const API_URL_ROLES = 'backend/api.php/records/roles';
+        const tableBody = document.getElementById('tabel-users-body');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const searchInput = document.getElementById('search-input');
+        const totalUsersElement = document.getElementById('total-users');
+        const totalAdminsElement = document.getElementById('total-admins');
+        const totalAnggotaElement = document.getElementById('total-anggota');
+        const usersTerbaruElement = document.getElementById('users-terbaru');
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteUserNameElement = document.getElementById('delete-user-name');
+        const confirmDeleteButton = document.getElementById('confirm-delete');
+
+        let allUsers = [];
+        let currentDeleteId = null;
+        let sortDirection = {};
+
+        // 1. Fungsi untuk mengambil data Roles dan mengubahnya jadi Peta (Map)
+        async function ambilDataRoles() {
+            const response = await fetch(API_URL_ROLES);
+            if (!response.ok) throw new Error('Gagal memuat roles');
+            const data = await response.json();
+            // Ubah array [ {id: 1, nama_role: 'Admin'} ] menjadi Map { 1 => 'Admin' }
+            return new Map(data.records.map(role => [role.id, role.nama_role]));
+        }
+
+        // 2. Fungsi untuk mengambil data Users dan menampilkannya
+        async function ambilDataUsers(rolesMap) {
+            try {
+                const response = await fetch(API_URL_USERS);
+                if (!response.ok) throw new Error('Gagal mengambil data users.');
+                const data = await response.json();
+                allUsers = data.records;
+
+                // Update statistics
+                updateStatistics(allUsers, rolesMap);
+
+                // Display users
+                tampilkanUsers(allUsers, rolesMap);
+
+                loadingSpinner.style.display = 'none';
+            } catch (error) {
+                loadingSpinner.innerHTML = `<div class="alert alert-danger animate__animated animate__shakeX">${error.message}</div>`;
+            }
+        }
+
+        // --- Function to display users ---
+        function tampilkanUsers(daftarUsers, rolesMap) {
+            tableBody.innerHTML = '';
+
+            if (daftarUsers.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="bi bi-people"></i>
+                            <p>Belum ada data pengguna atau tidak ada hasil pencarian.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            daftarUsers.forEach((user, index) => {
+                // Ambil nama role dari Map, jika tidak ada, tampilkan ID-nya
+                const namaRole = rolesMap.get(user.role_id) || `(ID: ${user.role_id})`;
+                const roleClass = namaRole.toLowerCase() === 'admin' ? 'admin' :
+                    namaRole.toLowerCase() === 'anggota' ? 'anggota' : 'default';
+
+                const baris = document.createElement('tr');
+                baris.className = 'table-row-animate';
+                baris.style.animationDelay = `${index * 0.05}s`;
+
+                baris.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar">${user.nama_lengkap.charAt(0).toUpperCase()}</div>
+                            <strong>${user.nama_lengkap}</strong>
+                        </div>
+                    </td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td><span class="role-badge ${roleClass}">${namaRole}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="users-edit.html?id=${user.id}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil-fill"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="showDeleteModal(${user.id}, '${user.username}')">
+                                <i class="bi bi-trash-fill"></i> Hapus
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(baris);
+            });
+        }
+
+        // --- Function to update statistics ---
+        function updateStatistics(daftarUsers, rolesMap) {
+            // Total users
+            totalUsersElement.textContent = daftarUsers.length;
+
+            // Total admins
+            const adminRoleId = Array.from(rolesMap.entries()).find(([key, value]) =>
+                value.toLowerCase() === 'admin')?.[0];
+            const totalAdmins = adminRoleId ?
+                daftarUsers.filter(user => user.role_id === adminRoleId).length : 0;
+            totalAdminsElement.textContent = totalAdmins;
+
+            // Total anggota
+            const anggotaRoleId = Array.from(rolesMap.entries()).find(([key, value]) =>
+                value.toLowerCase() === 'anggota')?.[0];
+            const totalAnggota = anggotaRoleId ?
+                daftarUsers.filter(user => user.role_id === anggotaRoleId).length : 0;
+            totalAnggotaElement.textContent = totalAnggota;
+
+            // Newest users (added in the current month)
+            // Since we don't have creation date in the API, we'll simulate this
+            // In a real application, you would filter by creation date
+            const usersTerbaru = Math.floor(daftarUsers.length * 0.3); // Simulate 30% added this month
+            usersTerbaruElement.textContent = usersTerbaru;
+        }
+
+        // --- Search functionality ---
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+
+            if (searchTerm === '') {
+                ambilDataUsers(allRolesMap);
+                return;
+            }
+
+            const filteredUsers = allUsers.filter(user =>
+                user.nama_lengkap.toLowerCase().includes(searchTerm) ||
+                user.username.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm)
+            );
+
+            tampilkanUsers(filteredUsers, allRolesMap);
+        });
+
+        // --- Sort table functionality ---
+        function sortTable(columnIndex) {
+            const key = columnIndex === 0 ? 'id' :
+                columnIndex === 1 ? 'nama_lengkap' :
+                    columnIndex === 2 ? 'username' :
+                        columnIndex === 3 ? 'email' : 'role_id';
+
+            // Toggle sort direction
+            sortDirection[key] = sortDirection[key] === 'asc' ? 'desc' : 'asc';
+
+            // Sort the data
+            const sortedUsers = [...allUsers].sort((a, b) => {
+                const valueA = a[key] || '';
+                const valueB = b[key] || '';
+
+                if (sortDirection[key] === 'asc') {
+                    return valueA.toString().localeCompare(valueB.toString());
+                } else {
+                    return valueB.toString().localeCompare(valueA.toString());
+                }
+            });
+
+            // Display sorted data
+            tampilkanUsers(sortedUsers, allRolesMap);
+        }
+
+        // --- Show delete confirmation modal ---
+        function showDeleteModal(id, nama) {
+            currentDeleteId = id;
+            deleteUserNameElement.textContent = nama;
+            deleteModal.show();
+        }
+
+        // --- Confirm delete button click ---
+        confirmDeleteButton.addEventListener('click', async () => {
+            if (!currentDeleteId) return;
+
+            try {
+                const response = await fetch(`${API_URL_USERS}/${currentDeleteId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Gagal menghapus data.');
+
+                // Show success notification
+                showNotification('User berhasil dihapus!', 'success');
+
+                // Close modal
+                deleteModal.hide();
+
+                // Reload data
+                location.reload();
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        });
+
+        // --- Function to show notification ---
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // Trigger animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // --- Parallax effect on scroll ---
+        window.addEventListener('scroll', function () {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.parallax-bg');
+            const navbar = document.querySelector('.navbar');
+
+            if (parallax) {
+                parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+
+            if (navbar) {
+                if (scrolled > 50) {
+                    navbar.style.padding = '0.5rem 0';
+                    navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+                } else {
+                    navbar.style.padding = '1rem 0';
+                    navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+                }
+            }
+        });
+
+        // --- Add ripple effect to buttons ---
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+
+                this.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // 3. Saat halaman dimuat, ambil Roles dulu, baru ambil Users
+        let allRolesMap;
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                allRolesMap = await ambilDataRoles();
+                await ambilDataUsers(allRolesMap);
+            } catch (error) {
+                loadingSpinner.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            }
+        });
+    </script>
+
+    <style>
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Buku - Perpustakaan </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --info-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/books/1920/1080.jpg') center/cover no-repeat;
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        .navbar {
+            background: var(--primary-gradient) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .nav-link {
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            font-weight: 700;
+            color: #333;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .btn {
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            border: none;
+        }
+
+        .btn-danger {
+            background: var(--secondary-gradient);
+            border: none;
+        }
+
+        .btn-info {
+            background: var(--info-gradient);
+            border: none;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid #eee;
+            font-weight: 600;
+            color: #555;
+            position: relative;
+            padding: 15px 12px;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+
+        .table tbody td {
+            padding: 15px 12px;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+            padding: 15px 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #721c24;
+        }
+
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 120px;
+            height: 120px;
+            background: var(--success-gradient);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 70%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            background: var(--warning-gradient);
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            bottom: 10%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            border-radius: 30px;
+            padding: 10px 20px 10px 45px;
+            border: 1px solid #ddd;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .table-row-animate {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 200px;
+            margin: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand animate__animated animate__fadeInLeft" href="index.html">
+                <i class="bi bi-book-half"></i>
+                Perpustakaan 
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="buku-list.html">Daftar Buku</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 animate__animated animate__fadeInDown">
+            <h2><i class="bi bi-journal-richtext"></i> Daftar Buku</h2>
+            <a href="buku-tambah.html" class="btn btn-success animate__animated animate__fadeInRight">
+                <i class="bi bi-plus-circle-fill"></i> Tambah Buku Baru
+            </a>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card animate__animated animate__fadeInUp">
+                <div class="stat-number" id="total-buku">0</div>
+                <div class="stat-label">Total Buku</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="stat-number" id="total-stok">0</div>
+                <div class="stat-label">Total Stok</div>
+            </div>
+            <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="stat-number" id="buku-terbaru">0</div>
+                <div class="stat-label">Buku Terbaru</div>
+            </div>
+        </div>
+
+        <div class="search-container animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="search-input"
+                placeholder="Cari buku berdasarkan judul atau ISBN...">
+        </div>
+
+        <div id="loading-spinner" class="text-center mt-5 animate__animated animate__fadeIn">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Memuat...</span>
+            </div>
+            <p class="mt-3">Memuat data buku...</p>
+        </div>
+
+        <div id="error-message" class="alert alert-danger animate__animated animate__shakeX" style="display: none;">
+        </div>
+
+        <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Judul</th>
+                                <th>ISBN</th>
+                                <th>Tahun</th>
+                                <th>Stok</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-buku-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // URL ke API (sesuaikan jika nama folder beda)
+        const API_URL = 'backend/api.php/records/buku';
+
+        const tableBody = document.getElementById('tabel-buku-body');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorMessage = document.getElementById('error-message');
+        const searchInput = document.getElementById('search-input');
+        const totalBukuElement = document.getElementById('total-buku');
+        const totalStokElement = document.getElementById('total-stok');
+        const bukuTerbaruElement = document.getElementById('buku-terbaru');
+
+        let allBooks = [];
+
+        // --- (READ) Ambil dan Tampilkan Data ---
+        async function ambilDataBuku() {
+            loadingSpinner.style.display = 'block';
+            errorMessage.style.display = 'none';
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Gagal mengambil data dari server.');
+
+                const data = await response.json();
+                allBooks = data.records;
+
+                // Update statistics
+                updateStatistics(allBooks);
+
+                // Display books
+                tampilkanBuku(allBooks);
+
+                loadingSpinner.style.display = 'none';
+
+            } catch (error) {
+                loadingSpinner.style.display = 'none';
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        // --- Function to display books ---
+        function tampilkanBuku(daftarBuku) {
+            tableBody.innerHTML = ''; // Kosongkan tabel
+
+            if (daftarBuku.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>Belum ada data buku atau tidak ada hasil pencarian.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            daftarBuku.forEach((buku, index) => {
+                const baris = document.createElement('tr');
+                baris.className = 'table-row-animate';
+                baris.style.animationDelay = `${index * 0.05}s`;
+
+                baris.innerHTML = `
+                    <td>${buku.id}</td>
+                    <td><strong>${buku.judul}</strong></td>
+                    <td>${buku.isbn}</td>
+                    <td>${buku.tahun_terbit}</td>
+                    <td>
+                        <span class="badge bg-${buku.stok > 10 ? 'success' : buku.stok > 0 ? 'warning' : 'danger'} rounded-pill">
+                            ${buku.stok}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="buku-edit.html?id=${buku.id}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil-fill"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="hapusBuku(${buku.id}, '${buku.judul}')">
+                                <i class="bi bi-trash-fill"></i> Hapus
+                            </button>
+                            <a href="buku-relasi.html?id=${buku.id}" class="btn btn-sm btn-info text-white" title="Atur Penulis & Kategori">
+                                <i class="bi bi-link-45deg"></i> Relasi
+                            </a>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(baris);
+            });
+        }
+
+        // --- Function to update statistics ---
+        function updateStatistics(daftarBuku) {
+            // Total books
+            totalBukuElement.textContent = daftarBuku.length;
+
+            // Total stock
+            const totalStok = daftarBuku.reduce((sum, buku) => sum + parseInt(buku.stok), 0);
+            totalStokElement.textContent = totalStok;
+
+            // Newest books (published in the last 2 years)
+            const currentYear = new Date().getFullYear();
+            const bukuTerbaru = daftarBuku.filter(buku => parseInt(buku.tahun_terbit) >= currentYear - 2).length;
+            bukuTerbaruElement.textContent = bukuTerbaru;
+        }
+
+        // --- Search functionality ---
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+
+            if (searchTerm === '') {
+                tampilkanBuku(allBooks);
+                return;
+            }
+
+            const filteredBooks = allBooks.filter(buku =>
+                buku.judul.toLowerCase().includes(searchTerm) ||
+                buku.isbn.toLowerCase().includes(searchTerm)
+            );
+
+            tampilkanBuku(filteredBooks);
+        });
+
+        // --- (DELETE) Fungsi Hapus Buku ---
+        async function hapusBuku(id, judul) {
+            // Konfirmasi sebelum menghapus
+            if (!confirm(`Apakah Anda yakin ingin menghapus buku "${judul}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal menghapus data.');
+                }
+
+                // Show success notification
+                showNotification('Buku berhasil dihapus!', 'success');
+
+                // Reload data
+                ambilDataBuku();
+
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'danger');
+            }
+        }
+
+        // --- Function to show notification ---
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 animate__animated animate__fadeInDown`;
+            notification.style.zIndex = '9999';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.remove('animate__fadeInDown');
+                notification.classList.add('animate__fadeOutUp');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 1000);
+            }, 3000);
+        }
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.padding = '0.5rem 0';
+                navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+            } else {
+                navbar.style.padding = '1rem 0';
+                navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+            }
+        });
+
+        // Panggil fungsi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', ambilDataBuku);
+    </script>
+</body>
+
+</html>

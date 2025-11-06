@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User - Perpustakaan [NIM-NAMA ANDA]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container"><a class="navbar-brand" href="index.html">Perpustakaan</a></div>
+    </nav>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="mb-0">Edit User</h3>
+                    </div>
+                    <div class="card-body" id="form-container">
+                        <form id="form-edit">
+                            <input type="hidden" id="user_id">
+                            <div class="mb-3">
+                                <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control" id="nama_lengkap" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password_hash" class="form-label">Password Baru (Opsional)</label>
+                                    <input type="password" class="form-control" id="password_hash">
+                                    <small class="form-text text-muted">Kosongkan jika tidak ingin mengubah
+                                        password.</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="role_id" class="form-label">Role (Peran)</label>
+                                    <select class="form-select" id="role_id" required>
+                                        <option value="">Memuat roles...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a href="users-list.html" class="btn btn-secondary"><i class="bi bi-arrow-left"></i>
+                                    Batal</a>
+                                <button type="submit" class="btn btn-primary" id="btn-update"><i
+                                        class="bi bi-save-fill"></i> Perbarui</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="loading-edit" class="text-center p-5">...memuat data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_URL_USERS = 'backend/api.php/records/users';
+        const API_URL_ROLES = 'backend/api.php/records/roles';
+        const dropdownRoles = document.getElementById('role_id');
+        const form = document.getElementById('form-edit');
+        const btnUpdate = document.getElementById('btn-update');
+        const loadingEdit = document.getElementById('loading-edit');
+        const formContainer = document.getElementById('form-container');
+        formContainer.style.display = 'none'; // Sembunyikan form saat loading
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        // 1. Fungsi untuk memuat Roles ke Dropdown
+        async function muatRoles() {
+            try {
+                const response = await fetch(API_URL_ROLES);
+                if (!response.ok) throw new Error('Gagal memuat roles.');
+                const data = await response.json();
+                dropdownRoles.innerHTML = '<option value="">-- Pilih Role --</option>';
+                data.records.forEach(role => {
+                    dropdownRoles.innerHTML += `<option value="${role.id}">${role.nama_role}</option>`;
+                });
+            } catch (error) {
+                dropdownRoles.innerHTML = `<option value="">Error: ${error.message}</option>`;
+                throw error;
+            }
+        }
+
+        // 2. Fungsi untuk mengambil data User yang spesifik
+        async function muatDataUser() {
+            if (!userId) throw new Error('ID User tidak ditemukan!');
+            try {
+                const response = await fetch(`${API_URL_USERS}/${userId}`);
+                if (!response.ok) throw new Error('Gagal mengambil data user.');
+                const user = await response.json();
+
+                // Isi form
+                document.getElementById('user_id').value = user.id;
+                document.getElementById('nama_lengkap').value = user.nama_lengkap;
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                // Jangan isi password
+
+                return user; // Kembalikan data user
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // 3. Saat halaman dimuat, jalankan keduanya
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Jalankan keduanya secara paralel
+                const [_, userData] = await Promise.all([
+                    muatRoles(),  // Muat dropdown
+                    muatDataUser() // Ambil data user
+                ]);
+
+                // Setelah keduanya selesai, set nilai dropdown
+                document.getElementById('role_id').value = userData.role_id;
+
+                // Tampilkan form
+                formContainer.style.display = 'block';
+                loadingEdit.style.display = 'none';
+
+            } catch (error) {
+                alert(error.message);
+                window.location.href = 'users-list.html';
+            }
+        });
+
+        // 4. Fungsi Update User
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('user_id').value;
+            const data = {
+                nama_lengkap: document.getElementById('nama_lengkap').value,
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                role_id: parseInt(document.getElementById('role_id').value)
+            };
+
+            // Cek jika password diisi, baru tambahkan ke data
+            const password = document.getElementById('password_hash').value;
+            if (password) {
+                data.password_hash = password;
+            }
+
+            btnUpdate.disabled = true;
+            btnUpdate.innerHTML = 'Memperbarui...';
+            try {
+                const response = await fetch(`${API_URL_USERS}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Gagal memperbarui data.');
+                alert('Data user berhasil diperbarui!');
+                window.location.href = 'users-list.html';
+            } catch (error) {
+                alert(error.message);
+                btnUpdate.disabled = false;
+                btnUpdate.innerHTML = 'Perbarui';
+            }
+        });
+    </script>
+</body>
+
+</html>

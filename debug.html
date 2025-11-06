@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .result {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>API Test Tool</h1>
+
+    <div class="test-section">
+        <h2>Debug Info</h2>
+        <button onclick="testDebug()">Test Debug</button>
+        <div id="debug-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Tables</h2>
+        <button onclick="testTables()">Test All Tables</button>
+        <div id="tables-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Specific Table</h2>
+        <input type="text" id="table-name" placeholder="Nama tabel" value="buku">
+        <button onclick="testTable()">Test Table</button>
+        <div id="table-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test CRUD Operations</h2>
+        <div>
+            <input type="text" id="crud-table" placeholder="Nama tabel" value="buku">
+            <button onclick="testRead()">Test Read</button>
+            <button onclick="testCreate()">Test Create</button>
+            <button onclick="testUpdate()">Test Update</button>
+            <button onclick="testDelete()">Test Delete</button>
+        </div>
+        <div id="crud-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'api';
+
+        async function testDebug() {
+            const result = document.getElementById('debug-result');
+            result.innerHTML = 'Mengambil debug info...';
+
+            try {
+                const response = await fetch(`${API_URL}/debug`);
+                const data = await response.json();
+
+                result.innerHTML = `
+                    <div class="success">
+                        <h3>Debug Info:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testTables() {
+            const result = document.getElementById('tables-result');
+            result.innerHTML = 'Menguji semua tabel...';
+
+            try {
+                const response = await fetch(`${API_URL}/debug`);
+                const data = await response.json();
+
+                const tables = data.tables || [];
+                let html = '<h3>Tabel yang Diizinkan:</h3><ul>';
+
+                tables.forEach(table => {
+                    html += `<li>${table}</li>`;
+                });
+
+                html += '</ul>';
+
+                result.innerHTML = `
+                    <div class="success">
+                        ${html}
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testTable() {
+            const tableName = document.getElementById('table-name').value;
+            const result = document.getElementById('table-result');
+
+            if (!tableName) {
+                result.innerHTML = '<div class="error">Masukkan nama tabel</div>';
+                return;
+            }
+
+            result.innerHTML = `Menguji tabel: ${tableName}...`;
+
+            try {
+                const response = await fetch(`${API_URL}/records/${tableName}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="success">
+                            <h3>✓ ${tableName} - Berhasil</h3>
+                            <p>Jumlah record: ${data.count}</p>
+                            <details>
+                                <summary>Response Data</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="error">
+                            <h3>✗ ${tableName} - Gagal</h3>
+                            <p>Error: ${data.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testRead() {
+            const tableName = document.getElementById('crud-table').value;
+            const result = document.getElementById('crud-result');
+
+            if (!tableName) {
+                result.innerHTML = '<div class="error">Masukkan nama tabel</div>';
+                return;
+            }
+
+            result.innerHTML = `Menguji READ ${tableName}...`;
+
+            try {
+                const response = await fetch(`${API_URL}/records/${tableName}`);
+                const data = await response.json();
+
+                result.innerHTML = `
+                    <div class="success">
+                        <h3>READ ${tableName}</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testCreate() {
+            const tableName = document.getElementById('crud-table').value;
+            const result = document.getElementById('crud-result');
+
+            if (!tableName) {
+                result.innerHTML = '<div class="error">Masukkan nama tabel</div>';
+                return;
+            }
+
+            result.innerHTML = `Menguji CREATE ${tableName}...`;
+
+            try {
+                const response = await fetch(`${API_URL}/records/${tableName}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test: 'data' })
+                });
+                const data = await response.json();
+
+                result.innerHTML = `
+                    <div class="success">
+                        <h3>CREATE ${tableName}</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testUpdate() {
+            const tableName = document.getElementById('crud-table').value;
+            const result = document.getElementById('crud-result');
+
+            if (!tableName) {
+                result.innerHTML = '<div class="error">Masukkan nama tabel</div>';
+                return;
+            }
+
+            result.innerHTML = `Menguji UPDATE ${tableName}...`;
+
+            try {
+                const response = await fetch(`${API_URL}/records/${tableName}/1`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test: 'updated' })
+                });
+                const data = await response.json();
+
+                result.innerHTML = `
+                    <div class="success">
+                        <h3>UPDATE ${tableName}</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testDelete() {
+            const tableName = document.getElementById('crud-table').value;
+            const result = document.getElementById('crud-result');
+
+            if (!tableName) {
+                result.innerHTML = '<div class="error">Masukkan nama tabel</div>';
+                return;
+            }
+
+            result.innerHTML = `Menguji DELETE ${tableName}...`;
+
+            try {
+                const response = await fetch(`${API_URL}/records/${tableName}/1`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                result.innerHTML = `
+                    <div class="success">
+                        <h3>DELETE ${tableName}</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

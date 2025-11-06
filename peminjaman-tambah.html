@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Transaksi Peminjaman - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-sm">
+        <div class="container"><a class="navbar-brand" href="index.html">Perpustakaan</a></div>
+    </nav>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="mb-0">Transaksi Peminjaman Baru</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-tambah">
+                            <div class="mb-3">
+                                <label for="user_id" class="form-label">Anggota Peminjam</label>
+                                <select class="form-select" id="user_id" required>
+                                    <option value="">Memuat anggota...</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="buku_id" class="form-label">Buku yang Dipinjam</label>
+                                <select class="form-select" id="buku_id" required>
+                                    <option value="">Memuat buku...</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tgl_pinjam" class="form-label">Tanggal Pinjam</label>
+                                    <input type="date" class="form-control" id="tgl_pinjam" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="tgl_jatuh_tempo" class="form-label">Tanggal Jatuh Tempo</label>
+                                    <input type="date" class="form-control" id="tgl_jatuh_tempo" required>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a href="peminjaman-list.html" class="btn btn-secondary"><i
+                                        class="bi bi-arrow-left"></i> Batal</a>
+                                <button type="submit" class="btn btn-primary" id="btn-simpan"><i
+                                        class="bi bi-save-fill"></i> Simpan Transaksi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_PEMINJAMAN = 'backend/api.php/records/peminjaman';
+        const API_DETAIL = 'backend/api.php/records/detail_peminjaman';
+        const API_USERS = 'backend/api.php/records/users';
+        const API_BUKU = 'backend/api.php/records/buku';
+
+        const form = document.getElementById('form-tambah');
+        const btnSimpan = document.getElementById('btn-simpan');
+        const userDropdown = document.getElementById('user_id');
+        const bukuDropdown = document.getElementById('buku_id');
+
+        // Fungsi helper untuk mengisi dropdown
+        async function isiDropdown(url, dropdown, idField, nameField, defaultOption) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Gagal memuat ${defaultOption}`);
+                const data = await response.json();
+                dropdown.innerHTML = `<option value="">-- Pilih ${defaultOption} --</option>`;
+                data.records.forEach(item => {
+                    dropdown.innerHTML += `<option value="${item[idField]}">${item[nameField]}</option>`;
+                });
+            } catch (error) { dropdown.innerHTML = `<option value="">${error.message}</option>`; }
+        }
+
+        // Saat halaman dimuat, isi kedua dropdown
+        document.addEventListener('DOMContentLoaded', () => {
+            isiDropdown(API_USERS, userDropdown, 'id', 'nama_lengkap', 'Anggota');
+            isiDropdown(API_BUKU, bukuDropdown, 'id', 'judul', 'Buku');
+
+            // Set tanggal pinjam hari ini
+            document.getElementById('tgl_pinjam').valueAsDate = new Date();
+            // Set jatuh tempo 7 hari dari sekarang
+            const tglTempo = new Date();
+            tglTempo.setDate(tglTempo.getDate() + 7);
+            document.getElementById('tgl_jatuh_tempo').valueAsDate = tglTempo;
+        });
+
+        // Saat simpan, kita lakukan 2 langkah
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnSimpan.disabled = true;
+            btnSimpan.innerHTML = 'Menyimpan...';
+
+            // Data untuk tabel header 'peminjaman'
+            const dataPeminjaman = {
+                user_id: parseInt(userDropdown.value),
+                tgl_pinjam: document.getElementById('tgl_pinjam').value,
+                tgl_jatuh_tempo: document.getElementById('tgl_jatuh_tempo').value,
+                status: 'Dipinjam' // Status default
+            };
+
+            try {
+                // LANGKAH 1: Simpan Peminjaman (Header)
+                const responseHeader = await fetch(API_PEMINJAMAN, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataPeminjaman)
+                });
+
+                if (!responseHeader.ok) throw new Error('Gagal menyimpan data peminjaman.');
+
+                // Ambil ID peminjaman baru yang barusan dibuat
+                const peminjamanIdBaru = await responseHeader.json();
+
+                // Data untuk tabel 'detail_peminjaman'
+                const dataDetail = {
+                    peminjaman_id: peminjamanIdBaru,
+                    buku_id: parseInt(bukuDropdown.value),
+                    jumlah: 1 // Versi sederhana, 1 buku
+                };
+
+                // LANGKAH 2: Simpan Detail Peminjaman
+                const responseDetail = await fetch(API_DETAIL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataDetail)
+                });
+
+                if (!responseDetail.ok) throw new Error('Gagal menyimpan detail buku.');
+
+                alert('Transaksi peminjaman baru berhasil disimpan!');
+                window.location.href = 'peminjaman-list.html';
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = 'Simpan Transaksi';
+            }
+        });
+    </script>
+</body>
+
+</html>

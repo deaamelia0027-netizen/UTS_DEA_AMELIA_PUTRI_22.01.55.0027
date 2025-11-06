@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Atur Relasi Buku - Perpustakaan </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Perpustakaan </a>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div id="loading" class="text-center p-5">...memuat data...</div>
+                <div class="card shadow-sm" id="form-container" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="mb-0">Atur Relasi untuk Buku: <span id="judul-buku" class="text-primary"></span></h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-relasi">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4><i class="bi bi-tags-fill"></i> Kategori</h4>
+                                    <div id="checkbox-kategori" class="border p-3"
+                                        style="max-height: 300px; overflow-y: auto;">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4><i class="bi bi-person-fill"></i> Penulis</h4>
+                                    <div id="checkbox-penulis" class="border p-3"
+                                        style="max-height: 300px; overflow-y: auto;">
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a href="buku-list.html" class="btn btn-secondary"><i class="bi bi-arrow-left"></i>
+                                    Kembali</a>
+                                <button type="submit" class="btn btn-primary" id="btn-simpan"><i
+                                        class="bi bi-save-fill"></i> Simpan Relasi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'backend/api.php/records';
+        const formContainer = document.getElementById('form-container');
+        const loading = document.getElementById('loading');
+        const judulBukuEl = document.getElementById('judul-buku');
+        const kategoriContainer = document.getElementById('checkbox-kategori');
+        const penulisContainer = document.getElementById('checkbox-penulis');
+        const form = document.getElementById('form-relasi');
+        const btnSimpan = document.getElementById('btn-simpan');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const bukuId = urlParams.get('id');
+
+        // Fungsi untuk mengambil data
+        async function fetchData(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Gagal memuat: ${url}`);
+            return response.json();
+        }
+
+        // Fungsi untuk merender checkbox
+        function renderCheckboxes(container, items, relasiMap, nameField, idField) {
+            container.innerHTML = '';
+            items.forEach(item => {
+                const id = item[idField];
+                const isChecked = relasiMap.has(id);
+                container.innerHTML += `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${id}" id="${nameField}-${id}" name="${nameField}" ${isChecked ? 'checked' : ''}>
+                        <label class="form-check-label" for="${nameField}-${id}">
+                            ${item[nameField]}
+                        </label>
+                    </div>
+                `;
+            });
+        }
+
+        // 1. Saat Halaman Dimuat: Ambil SEMUA data yang diperlukan
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!bukuId) {
+                alert('ID Buku tidak ditemukan!');
+                window.location.href = 'buku-list.html';
+                return;
+            }
+
+            try {
+                // Ambil 5 set data secara paralel
+                const [buku, allKategori, allPenulis, relKategori, relPenulis] = await Promise.all([
+                    fetchData(`${API_BASE}/buku/${bukuId}`),
+                    fetchData(`${API_BASE}/kategori`),
+                    fetchData(`${API_BASE}/penulis`),
+                    fetchData(`${API_BASE}/buku_kategori?filter=buku_id,eq,${bukuId}`),
+                    fetchData(`${API_BASE}/buku_penulis?filter=buku_id,eq,${bukuId}`)
+                ]);
+
+                // Set Judul Buku
+                judulBukuEl.textContent = buku.judul;
+
+                // Buat Peta (Map) untuk relasi yang ada agar mudah dicari
+                const relKategoriMap = new Map(relKategori.records.map(r => [r.kategori_id, true]));
+                const relPenulisMap = new Map(relPenulis.records.map(r => [r.penulis_id, true]));
+
+                // Render checkbox dengan data yang sudah dicentang
+                renderCheckboxes(kategoriContainer, allKategori.records, relKategoriMap, 'nama_kategori', 'id');
+                renderCheckboxes(penulisContainer, allPenulis.records, relPenulisMap, 'nama_penulis', 'id');
+
+                // Tampilkan form
+                loading.style.display = 'none';
+                formContainer.style.display = 'block';
+
+            } catch (error) {
+                loading.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            }
+        });
+
+        // 2. Saat Form Disimpan
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnSimpan.disabled = true;
+            btnSimpan.innerHTML = 'Menyimpan...';
+
+            try {
+                // Hapus SEMUA relasi lama untuk buku ini
+                // Ini adalah pola "delete all, insert all"
+                await Promise.all([
+                    fetch(`${API_BASE}/buku_kategori?filter=buku_id,eq,${bukuId}`, { method: 'DELETE' }),
+                    fetch(`${API_BASE}/buku_penulis?filter=buku_id,eq,${bukuId}`, { method: 'DELETE' })
+                ]);
+
+                // Dapatkan ID yang dicentang dari form
+                const kategoriTerpilih = Array.from(document.querySelectorAll('input[name="nama_kategori"]:checked')).map(el => el.value);
+                const penulisTerpilih = Array.from(document.querySelectorAll('input[name="nama_penulis"]:checked')).map(el => el.value);
+
+                // Buat array dari promise untuk semua POST baru
+                const promises = [];
+
+                // Tambahkan POST untuk Kategori
+                kategoriTerpilih.forEach(kategori_id => {
+                    const data = { buku_id: bukuId, kategori_id: kategori_id };
+                    promises.push(
+                        fetch(`${API_BASE}/buku_kategori`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        })
+                    );
+                });
+
+                // Tambahkan POST untuk Penulis
+                penulisTerpilih.forEach(penulis_id => {
+                    const data = { buku_id: bukuId, penulis_id: penulis_id };
+                    promises.push(
+                        fetch(`${API_BASE}/buku_penulis`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        })
+                    );
+                });
+
+                // Jalankan semua POST secara paralel
+                await Promise.all(promises);
+
+                alert('Relasi berhasil diperbarui!');
+                window.location.href = 'buku-list.html';
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = 'Simpan Relasi';
+            }
+        });
+    </script>
+</body>
+
+</html>
